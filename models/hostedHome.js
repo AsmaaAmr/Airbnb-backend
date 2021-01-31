@@ -63,7 +63,7 @@ const hostedHomeSchema = new Schema({
   BeachFront: {
     type: Boolean,
     required: false,
-  },
+  }
 });
 const HostedHome = mongoose.model("hostedHome", hostedHomeSchema);
 
