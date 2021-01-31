@@ -5,9 +5,11 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 //db connection
 const mongoose = require('mongoose');
-var url = "mongodb://localhost:27017/Airbnb-GP";
+//var localurl = "mongodb://localhost:27017/Airbnb-GP";
+var cloudURL = "mongodb+srv://kamel_elsehly:033183987@cluster0iti.lleni.mongodb.net/Airbnb-GP?retryWrites=true&w=majority";
 //var mongoDB = 'mongodb://127.0.0.1/Airbnb-GP';
-mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(cloudURL, { useNewUrlParser: true, useUnifiedTopology: true })
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
@@ -32,6 +34,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+
 usersRouter(app)
 
 // catch 404 and forward to error handler
@@ -51,3 +56,5 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+
+
