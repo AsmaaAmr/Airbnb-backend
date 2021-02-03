@@ -1,4 +1,6 @@
 const User = require("../models/users");
+const HostedHome = require("../models/hostedHome");
+const Reservation = require("../models/reservations");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 var config = require("../config");
@@ -63,7 +65,7 @@ module.exports = {
   //login
   async login(req, res) {
     const body = req.body;
-    const user = await User.findOne({ email: body.email });
+    const user = await User.findOne({ email: body.email }).findOne({ type: 0 });
     if (user) {
       // check user password with hashed password stored in the database
       const validPassword = await bcrypt.compare(body.password, user.password);
@@ -86,7 +88,6 @@ module.exports = {
       return res
         .status(401)
         .send({ auth: false, message: "No token provided." });
-
     jwt.verify(token, config.secret, function (err, decoded) {
       if (err)
         return res.status(500).send({ auth: false, message: "Failed to authenticate token." });
@@ -98,10 +99,6 @@ module.exports = {
         res.status(200).send(user);
       });
     });
-    // User.findById(req.params.id, function (err, doc) {
-    //   console.log(req.params.id);
-    //   res.status(200).send(doc);
-    // });
   },
   //EditProfile
   editProfile(req, res, next) {
@@ -115,6 +112,147 @@ module.exports = {
       .then((user) => res.send(user))
       //else send to middle
       .catch(next);
+  },
+  //Search for Home
+  search(req, res) {
+    const body = req.body;
+    console.log(req.body);
+    HostedHome.aggregate(
+      [
+        {
+          $match: {
+            location: req.body.location,
+            no_Of_Guests: { $gte: req.body.no_Of_Guests },
+          },
+        },
+        {
+          $lookup: {
+            from: "reservations",
+            let: { hostedHomeID: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$hostedHomeID","$$hostedHomeID"] },
+                      {
+                        $not: [
+                          {
+                            $and: [
+                              {
+                                $eq: ["$checkIn", new Date(req.body.fromDate)],
+                              },
+                              {
+                                $eq: ["$checkOut", new Date(req.body.toDate)],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                      {
+                        $not: [
+                          {
+                            $and: [
+                              {
+                                $lte: ["$checkIn", new Date(req.body.fromDate)],
+                              },
+                              {
+                                $lte: ["$checkOut", new Date(req.body.toDate)],
+                              },
+                              {
+                                $gte: [
+                                  "$checkOut",
+                                  new Date(req.body.fromDate),
+                                ],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                      {
+                        $not: [
+                          {
+                            $and: [
+                              {
+                                $gte: ["$checkIn", new Date(req.body.fromDate)],
+                              },
+                              {
+                                $gte: ["$checkOut", new Date(req.body.toDate)],
+                              },
+                              {
+                                $lte: ["$checkIn", new Date(req.body.toDate)],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                      {
+                        $not: [
+                          {
+                            $and: [
+                              {
+                                $lte: ["$checkIn", new Date(req.body.fromDate)],
+                              },
+                              {
+                                $gte: ["$checkOut", new Date(req.body.toDate)],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                      {
+                        $not: [
+                          {
+                            $and: [
+                              {
+                                $gte: ["$checkIn", new Date(req.body.fromDate)],
+                              },
+                              {
+                                $lte: ["$checkOut", new Date(req.body.toDate)],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "reservedhomes",
+          },
+        },
+      ],
+      (err, docs) => {
+        if (err) res.send(err.message);
+        res.send(docs);
+      }
+    );
+  },
+  //Reserve Home
+  reserve(req,res){
+    var token = req.headers["x-access-token"];
+    if (!token)
+      return res
+        .status(401)
+        .send({ auth: false, message: "No token provided." });
+    jwt.verify(token, config.secret, function (err, decoded) {
+      if (err)
+        return res
+          .status(500)
+          .send({ auth: false, message: "Failed to authenticate token." });
+      User.findById(decoded.id, function (err, user) {
+        if (err)
+          return res.status(500).send("There was a problem finding the user.");
+        if (!user) return res.status(404).send("No user found.");
+        const id =req.params.id;
+        const reservation = new Reservation(req.body);
+        reservation.hostedHomeID = id;
+        reservation.userID =decoded.id
+        reservation.save();
+        res.status(200).send(reservation);
+      });
+    });
   },
   //logout
   logout(req, res) {
