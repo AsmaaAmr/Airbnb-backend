@@ -19,6 +19,10 @@ module.exports = (app) =>{
   app.get("/profile",userController.showProfile);
   //Edit profile
   app.put('/editProfile/:id', userController.editProfile);
+  //Search route
+  app.post('/search',userController.search);
+  //Reservation route
+  app.post('/reserveHome/:id',userController.reserve);
 
 }
 // /* GET users listing. */
