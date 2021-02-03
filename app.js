@@ -12,6 +12,8 @@ mongoose.connect(cloudURL, { useNewUrlParser: true, useUnifiedTopology: true })
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var hostsRouter = require('./routes/hosts');
+var adminsRouter = require('./routes/admins');
 
 //Get the default connection
 var db = mongoose.connection;
@@ -33,11 +35,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/hosts', hostsRouter);
+//app.use('/admins', adminsRouter);
+
 
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 
 usersRouter(app)
+hostsRouter(app)
+//adminsRouter(app)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -16,13 +16,13 @@ module.exports = (app) =>{
   //logout route
   app.get("/logout",userController.logout);
   //ShowProfile route
-  app.get("/profile",userController.showProfile);
+  app.get("/user/profile",userController.showProfile);
   //Edit profile
-  app.put('/editProfile/:id', userController.editProfile);
+  app.put('/user/editProfile/:id', userController.editProfile);
   //Search route
   app.post('/search',userController.search);
   //Reservation route
-  app.post('/reserveHome/:id',userController.reserve);
+  app.post('/user/reserveHome/:id',userController.reserve);
 
 }
 // /* GET users listing. */

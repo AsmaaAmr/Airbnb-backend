@@ -229,13 +229,11 @@ module.exports = {
       }
     );
   },
-  //Reserve Home
-  reserve(req,res){
+  //Host A Home
+  hostHome(req,res){
     var token = req.headers["x-access-token"];
     if (!token)
-      return res
-        .status(401)
-        .send({ auth: false, message: "No token provided." });
+      return res.status(401).send({ auth: false, message: "No token provided." });
     jwt.verify(token, config.secret, function (err, decoded) {
       if (err)
         return res
@@ -245,19 +243,38 @@ module.exports = {
         if (err)
           return res.status(500).send("There was a problem finding the user.");
         if (!user) return res.status(404).send("No user found.");
-        if(user.type ==false){
-          const id =req.params.id;
-          const reservation = new Reservation(req.body);
-          reservation.hostedHomeID = id;
-          reservation.userID =decoded.id
-          reservation.save();
-          return res.status(200).send(reservation);
+        if(user.type ==true){
+          const hostHome = new HostedHome(req.body);
+          hostHome.HostID =decoded.id;
+          hostHome.save();
+          return res.status(200).send(hostHome);
         }
         else{
-          return res.status(404).send("You cannot reserve by this user");
+          return res.status(404).send("You cannot Hosted a Home by this user");
         }
       });
     });
+  },
+  //Edit Hosted Home
+  editHostedHome(req,res,next){
+    const HomeID = req.params.id;
+    const HostedHomeProps = req.body;
+    // get home and update
+    HostedHome.findByIdAndUpdate({ _id: HomeID }, HostedHomeProps)
+      // if success get home after updated
+      .then(() => HostedHome.findById({ _id: HomeID }))
+      //if you get home send it
+      .then((home) => res.send(home))
+      //else send to middle
+      .catch(next);
+  },
+  //Delete Hosted Home
+  deleteHostedHome(req,res,next){
+    const HomeID = req.params.id;
+    HostedHome.findByIdAndRemove({ _id: HomeID })
+      // in case is removed return 204 abject?
+      .then((home) => res.status(204).send(home))
+      .catch(next);
   },
   //logout
   logout(req, res) {
