@@ -5,11 +5,9 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 //db connection
 const mongoose = require('mongoose');
-//var localurl = "mongodb://localhost:27017/Airbnb-GP";
 var cloudURL = "mongodb+srv://kamel_elsehly:033183987@cluster0iti.lleni.mongodb.net/Airbnb-GP?retryWrites=true&w=majority";
-//var mongoDB = 'mongodb://127.0.0.1/Airbnb-GP';
 mongoose.connect(cloudURL, { useNewUrlParser: true, useUnifiedTopology: true })
-
+mongoose.set('useFindAndModify', false);
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var hostsRouter = require('./routes/hosts');
@@ -36,7 +34,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/hosts', hostsRouter);
-//app.use('/admins', adminsRouter);
+app.use('/admins', adminsRouter);
 
 
 const bodyParser = require('body-parser');
@@ -44,7 +42,7 @@ app.use(bodyParser.json());
 
 usersRouter(app)
 hostsRouter(app)
-//adminsRouter(app)
+adminsRouter(app)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

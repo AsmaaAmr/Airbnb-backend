@@ -4,6 +4,7 @@ const Reservation = require("../models/reservations");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 var config = require("../config");
+const Admin = require("../models/admin");
 //contain all business logic
 module.exports = {
   all(req, res, next) {
@@ -14,14 +15,15 @@ module.exports = {
       .catch(next);
   },
 
-  create(req, res, next) {
+ async create(req, res, next) {
     // next from middelware
     const userProps = req.body;
-    User.create(userProps)
+    const salt = await bcrypt.genSalt(10);
+    userProps.password = await bcrypt.hash(userProps.password, salt);
+    Admin.create(userProps)
       .then((user) => res.send(user)) // 200 to user
       .catch(next); // if error send to next middle ware
   },
-
   edit(req, res, next) {
     const userId = req.params.id;
     const userProps = req.body;
