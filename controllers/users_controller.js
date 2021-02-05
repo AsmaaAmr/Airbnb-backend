@@ -51,17 +51,19 @@ module.exports = {
     if (!(body.email && body.password)) {
       return res.status(400).send({ error: "Data not formatted properly" });
     }
-    // createing a new mongoose doc from user data
     const user = new User(body);
-    // generate salt to hash password
     const salt = await bcrypt.genSalt(10);
-    // now we set user password to hashed password
     user.password = await bcrypt.hash(user.password, salt);
-    user.save().then((doc) => {
-      var token = jwt.sign({ id: user._id }, config.secret, {
-        expiresIn: 86400,
-      });
-      res.status(200).send({ auth: true, token: token });
+    user.save().then(async(doc) => {
+      const userdetails = await User.findOne({ email: body.email });
+      if (userdetails) {
+          var token = jwt.sign({ id: userdetails._id }, config.secret, {
+            expiresIn: 86400,
+          });
+          res.status(200).json({ auth: true, token: token,userinfo: userdetails,message:"user is logged in with email "+userdetails.email });
+      } else {
+        res.status(401).json({ error: "User does not exist" });
+      }
     });
   },
   //login
@@ -69,13 +71,12 @@ module.exports = {
     const body = req.body;
     const user = await User.findOne({ email: body.email });
     if (user) {
-      // check user password with hashed password stored in the database
       const validPassword = await bcrypt.compare(body.password, user.password);
       if (validPassword) {
         var token = jwt.sign({ id: user._id }, config.secret, {
           expiresIn: 86400,
         });
-        res.status(200).json({ auth: true, token: token });
+        res.status(200).json({ auth: true, token: token,userinfo: user,message:"user is logged in with email "+user.email });
       } else {
         res.status(400).json({ auth: false, token: null });
       }
@@ -106,19 +107,14 @@ module.exports = {
   editProfile(req, res, next) {
     const userId = req.params.id;
     const userProps = req.body;
-    // get user and update
     User.findByIdAndUpdate({ _id: userId }, userProps)
-      // if success get user after updated
       .then(() => User.findById({ _id: userId }))
-      //if you get user send it
       .then((user) => res.send(user))
-      //else send to middle
       .catch(next);
   },
   //Search for Home
   search(req, res) {
     const body = req.body;
-    console.log(req.body);
     HostedHome.aggregate(
       [
         {
