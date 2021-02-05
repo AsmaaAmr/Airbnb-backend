@@ -17,6 +17,8 @@ module.exports = (app) =>{
   app.get("/logout",userController.logout);
   //ShowProfile route
   app.get("/user/profile",userController.showProfile);
+  //All trips for specific user
+  app.get("/user/trips",userController.getAllTrips);
   //Edit profile
   app.put('/user/editProfile/:id', userController.editProfile);
   //Search route
