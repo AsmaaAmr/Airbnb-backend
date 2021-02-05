@@ -42,45 +42,51 @@ module.exports = {
       .then((user) => res.status(204).send(user))
       .catch(next);
   },
-  //signup
-  async signup(req, res) {
-    const body = req.body;
+  //hostedHome
+  home(req,res){
+    return res.status(200).send("This is the home page of host");
+  },
+  // //signup
+  // async signup(req, res) {
+  //   const body = req.body;
 
-    if (!(body.email && body.password)) {
-      return res.status(400).send({ error: "Data not formatted properly" });
-    }
-    // createing a new mongoose doc from user data
-    const user = new User(body);
-    // generate salt to hash password
-    const salt = await bcrypt.genSalt(10);
-    // now we set user password to hashed password
-    user.password = await bcrypt.hash(user.password, salt);
-    user.save().then((doc) => {
-      var token = jwt.sign({ id: user._id }, config.secret, {
-        expiresIn: 86400,
-      });
-      res.status(200).send({ auth: true, token: token });
-    });
-  },
-  //login
-  async login(req, res) {
-    const body = req.body;
-    const user = await User.findOne({ email: body.email });
-    if (user) {
-      // check user password with hashed password stored in the database
-      const validPassword = await bcrypt.compare(body.password, user.password);
-      if (validPassword) {
-        var token = jwt.sign({ id: user._id }, config.secret, {
-          expiresIn: 86400,
-        });
-        res.status(200).json({ auth: true, token: token });
-      } else {
-        res.status(400).json({ auth: false, token: null });
-      }
-    } else {
-      res.status(401).json({ error: "User does not exist" });
-    }
-  },
+  //   if (!(body.email && body.password)) {
+  //     return res.status(400).send({ error: "Data not formatted properly" });
+  //   }
+  //   // createing a new mongoose doc from user data
+  //   const user = new User(body);
+  //   // generate salt to hash password
+  //   const salt = await bcrypt.genSalt(10);
+  //   // now we set user password to hashed password
+  //   user.password = await bcrypt.hash(user.password, salt);
+  //   user.save().then((doc) => {
+  //     var token = jwt.sign({ id: user._id }, config.secret, {
+  //       expiresIn: 86400,
+  //     });
+  //     res.status(200).send({ auth: true, token: token });
+  //   });
+  // },
+  // //login
+  // async login(req, res) {
+  //   debugger;
+  //   const body = req.body;
+  //   const user = await User.findOne({ email: body.email });
+  //   if (user) {
+  //     // check user password with hashed password stored in the database
+  //     const validPassword = await bcrypt.compare(body.password, user.password);
+  //     if (validPassword) {
+  //       var token = jwt.sign({ id: user._id }, config.secret, {
+  //         expiresIn: 86400,
+  //       });
+  //       res.status(200).json({ auth: true, token: token });
+  //       //res.redirect("/host/");
+  //     } else {
+  //       res.status(400).json({ auth: false, token: null });
+  //     }
+  //   } else {
+  //     res.status(401).json({ error: "User does not exist" });
+  //   }
+  // },
   //ShowProfile
   showProfile(req, res) {
     var token = req.headers["x-access-token"];
@@ -104,13 +110,9 @@ module.exports = {
   editProfile(req, res, next) {
     const userId = req.params.id;
     const userProps = req.body;
-    // get user and update
     User.findByIdAndUpdate({ _id: userId }, userProps)
-      // if success get user after updated
       .then(() => User.findById({ _id: userId }))
-      //if you get user send it
       .then((user) => res.send(user))
-      //else send to middle
       .catch(next);
   },
   //Search for Home
@@ -259,20 +261,15 @@ module.exports = {
   editHostedHome(req,res,next){
     const HomeID = req.params.id;
     const HostedHomeProps = req.body;
-    // get home and update
     HostedHome.findByIdAndUpdate({ _id: HomeID }, HostedHomeProps)
-      // if success get home after updated
       .then(() => HostedHome.findById({ _id: HomeID }))
-      //if you get home send it
       .then((home) => res.send(home))
-      //else send to middle
       .catch(next);
   },
   //Delete Hosted Home
   deleteHostedHome(req,res,next){
     const HomeID = req.params.id;
     HostedHome.findByIdAndRemove({ _id: HomeID })
-      // in case is removed return 204 abject?
       .then((home) => res.status(204).send(home))
       .catch(next);
   },
