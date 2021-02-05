@@ -257,6 +257,23 @@ module.exports = {
       });
     });
   },
+  //get All trips for this user
+  getAllTrips(req,res){
+    var token = req.headers["x-access-token"];
+    if (!token)
+      return res.status(401).send({ auth: false, message: "No token provided." });
+    jwt.verify(token, config.secret, function (err, decoded) {
+      if (err)
+        return res.status(500).send({ auth: false, message: "Failed to authenticate token." });
+      Reservation.find({userID:decoded.id}, function (err, reservertions) {
+        if (err)
+          return res.status(500).send("There was a problem finding reservations.");
+        if (!reservertions) return res.status(404).send("No reservations found.");
+
+        res.status(200).send(reservertions);
+      });
+    });
+  },
   //logout
   logout(req, res) {
     res.status(200).send({ auth: false, token: null });
