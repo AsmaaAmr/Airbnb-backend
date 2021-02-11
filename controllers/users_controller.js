@@ -70,12 +70,14 @@ module.exports = {
   async login(req, res) {
     const body = req.body;
     const user = await User.findOne({ email: body.email });
+    console.log(req.body);
     if (user) {
       const validPassword = await bcrypt.compare(body.password, user.password);
       if (validPassword) {
         var token = jwt.sign({ id: user._id }, config.secret, {
           expiresIn: 86400,
         });
+        res.cookie('token', token, { httpOnly: true });
         res.status(200).json({ auth: true, token: token,userinfo: user,message:"user is logged in with email "+user.email });
       } else {
         res.status(400).json({ auth: false, token: null });
