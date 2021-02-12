@@ -17,6 +17,7 @@ module.exports = (app) =>{
   //Search route
   app.post('/search',hostController.search);
   app.post('/host/hostHome',hostController.hostHome);
+  app.get('/host/hostedhomes',hostController.getAllHosted);
   app.put('/host/editHostedHome/:id',hostController.editHostedHome);
   app.delete('/host/deleteHostedHome/:id',hostController.deleteHostedHome);
 
