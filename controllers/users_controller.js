@@ -276,6 +276,12 @@ module.exports = {
       });
     });
   },
+  getTripDetails(req,res,next){
+    const hostedHomeID = req.params.id;
+    HostedHome.find({ _id: hostedHomeID },function(err,home){
+      res.status(200).send(home)
+    });
+  },
   //logout
   logout(req, res) {
     res.status(200).send({ auth: false, token: null });
