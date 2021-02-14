@@ -19,13 +19,13 @@ module.exports = (app) =>{
   app.get("/user/profile",userController.showProfile);
   //All trips for specific user
   app.get("/user/trips",userController.getAllTrips);
+  app.get("/user/trip/:id",userController.getTripDetails);
   //Edit profile
   app.put('/user/editProfile/:id', userController.editProfile);
   //Search route
   app.post('/search',userController.search);
   //Reservation route
   app.post('/user/reserveHome/:id',userController.reserve);
-
 }
 // /* GET users listing. */
 // router.get('/', function(req, res, next) {

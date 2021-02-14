@@ -277,4 +277,20 @@ module.exports = {
   logout(req, res) {
     res.status(200).send({ auth: false, token: null });
   },
+  getAllHosted(req,res){
+    var token = req.headers["x-access-token"];
+    if (!token)
+      return res.status(401).send({ auth: false, message: "No token provided." });
+    jwt.verify(token, config.secret, function (err, decoded) {
+      if (err)
+        return res.status(500).send({ auth: false, message: "Failed to authenticate token." });
+      HostedHome.find({HostID:decoded.id}, function (err, homes) {
+        if (err)
+          return res.status(500).send("There was a problem finding homes.");
+        if (!homes) return res.status(404).send("No homes found.");
+
+        res.status(200).send(homes);
+      });
+    });
+  }
 };
