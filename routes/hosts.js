@@ -15,7 +15,7 @@ module.exports = (app) =>{
   //Edit profile
   app.put('/host/editProfile/:id', hostController.editProfile);
   //Search route
-  app.post('/search',hostController.search);
+  //app.post('/search',hostController.search);
   app.post('/host/hostHome',hostController.hostHome);
   app.get('/host/hostedhomes',hostController.getAllHosted);
   app.put('/host/editHostedHome/:id',hostController.editHostedHome);

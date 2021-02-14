@@ -225,7 +225,7 @@ module.exports = {
       ],
       (err, docs) => {
         if (err) res.send(err.message);
-        res.send(docs);
+        res.status(200).send(docs);
       }
     );
   },
