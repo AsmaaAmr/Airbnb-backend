@@ -225,7 +225,7 @@ module.exports = {
       ],
       (err, docs) => {
         if (err) res.send(err.message);
-        res.send(docs);
+        res.status(200).send(docs);
       }
     );
   },
@@ -274,6 +274,12 @@ module.exports = {
 
         res.status(200).send(reservertions);
       });
+    });
+  },
+  getTripDetails(req,res,next){
+    const hostedHomeID = req.params.id;
+    HostedHome.find({ _id: hostedHomeID },function(err,home){
+      res.status(200).send(home)
     });
   },
   //logout
