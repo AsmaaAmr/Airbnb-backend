@@ -140,7 +140,8 @@ module.exports = {
         var token = jwt.sign({ id: admin._id }, config.secret, {
           expiresIn: 86400,
         });
-        res.status(200).json({ auth: true, token: token });
+        res.cookie('token', token, { httpOnly: true });
+        res.status(200).json({ auth: true,admininfo:admin,token: token });
       } else {
         res.status(400).json({ auth: false, token: null });
       }

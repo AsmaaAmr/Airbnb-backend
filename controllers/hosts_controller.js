@@ -2,10 +2,35 @@ const User = require("../models/users");
 const HostedHome = require("../models/hostedHome");
 const Reservation = require("../models/reservations");
 const bcrypt = require("bcrypt");
+const multer = require("multer");
 const jwt = require("jsonwebtoken");
 var config = require("../config");
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      cb(null, 'public');
+  },
+  filename: (req, file, cb) => {
+      console.log(file);
+      cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype == 'image/jpeg' || file.mimetype == 'image/png') {
+      cb(null, true);
+  } else {
+      cb(null, false);
+  }
+}
+const upload = multer({ storage: storage, fileFilter: fileFilter })
+
 //contain all business logic
 module.exports = {
+
+  uploadimg(req,res,next){
+    console.log(req.files)
+    res.json({message:"Images uploaded successfully"})
+  },
+  
   all(req, res, next) {
     limit = parseInt(req.query.limit) || "";
     User.find({})
@@ -247,7 +272,10 @@ module.exports = {
         if (!user) return res.status(404).send("No user found.");
         if(user.type ==true){
           const hostHome = new HostedHome(req.body);
+          console.log(req.body)
+          console.log(req.files)
           hostHome.HostID =decoded.id;
+          hostHome.images = req.files;
           hostHome.save();
           return res.status(200).send(hostHome);
         }
